@@ -1,4 +1,10 @@
 package tech.social.dtos;
 
-public class AlterRoleDTO {
-}
+import jakarta.validation.constraints.NotBlank;
+
+public record AlterRoleDTO (
+    @NotBlank
+    String username,
+    @NotBlank
+    String role
+    ){}
