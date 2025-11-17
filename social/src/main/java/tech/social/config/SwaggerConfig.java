@@ -1,4 +1,4 @@
-package tech.social.controllers;
+package tech.social.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -9,55 +9,40 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
+@Configuration
 public class SwaggerConfig {
+
     @Bean
     public OpenAPI customOpenAPI() {
-        // Define o esquema de segurança JWT
         final String securitySchemeName = "bearerAuth";
 
         return new OpenAPI()
-                // Informações da API
                 .info(new Info()
                         .title("Social Network API")
                         .version("1.0.0")
                         .description("""
-                                API RESTful de uma rede social simples desenvolvida com Spring Boot 3.
+                                API REST de uma rede social simples desenvolvida com Spring Boot.
                                 
                                 **Funcionalidades:**
-                                - Autenticação JWT (Login/Registro)
-                                - Gerenciamento de usuários (Promoção/Rebaixamento de roles)
-                                - CRUD de posts
-                                - Paginação de resultados
-                                - Controle de acesso baseado em roles (USER/ADMIN)
+                                - Autenticação JWT
+                                - Gerenciamento de usuários (registro, login, promoção/rebaixamento)
+                                - CRUD de posts com paginação
+                                - Controle de autorização por roles (USER e ADMIN)
                                 
-                                **Autenticação:**
-                                1. Faça login em `/auth/login` para obter o token JWT
-                                2. Clique no botão "Authorize" (🔒) no topo
-                                3. Cole o token retornado
-                                4. Teste os endpoints protegidos
-                                """)
-                        .contact(new Contact()
-                                .name("Seu Nome")
-                                .email("seu@email.com")
-                                .url("https://github.com/seu-usuario"))
-                        .license(new License()
-                                .name("Apache 2.0")
-                                .url("https://www.apache.org/licenses/LICENSE-2.0.html")))
-
-                // Servidores
+                                **Como usar:**
+                                1. Faça login em `/auth/login` com as credenciais (admin/12345 ou crie um usuário)
+                                2. Copie o token JWT retornado
+                                3. Clique no botão "Authorize" (cadeado verde) no topo da página
+                                4. Cole o token no campo "Value" e clique em "Authorize"
+                                5. Agora você pode testar os endpoints protegidos!
+                                """))
                 .servers(List.of(
-                        new Server()
-                                .url("http://localhost:8080")
-                                .description("Servidor de Desenvolvimento"),
-                        new Server()
-                                .url("https://api.exemplo.com")
-                                .description("Servidor de Produção (opcional)")
+                        new Server().url("http://localhost:8080").description("Servidor de Desenvolvimento")
                 ))
-
-                // Configuração de segurança JWT
                 .components(new Components()
                         .addSecuritySchemes(securitySchemeName, new SecurityScheme()
                                 .name(securitySchemeName)
@@ -65,8 +50,6 @@ public class SwaggerConfig {
                                 .scheme("bearer")
                                 .bearerFormat("JWT")
                                 .description("Insira o token JWT obtido no endpoint /auth/login")))
-
-                // Aplicar segurança globalmente
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName));
     }
 }

@@ -1,5 +1,8 @@
 package tech.social.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,6 +27,8 @@ import tech.social.repositories.PostRepository;
 
 @RestController
 @RequestMapping("/posts")
+@Tag(name = "Posts", description = "Endpoints para gerenciamento de posts")
+@SecurityRequirement(name = "bearerAuth")
 public class PostController {
     private final PostRepository postRepository;
     public PostController(PostRepository postRepository) {
@@ -31,6 +36,7 @@ public class PostController {
     }
     
     @PostMapping
+    @Operation(summary = "Criar um novo post")
     public ResponseEntity<PostResponseDTO> createPost(
             @RequestBody @Valid PostRequestDTO postDTO,
             @AuthenticationPrincipal User currentUser) {
@@ -40,6 +46,7 @@ public class PostController {
     }
     
     @GetMapping
+    @Operation(summary = "Listar todos os posts (paginado)")
     public ResponseEntity<Page<PostResponseDTO>> getAllPosts(
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<PostResponseDTO> posts = postRepository.findAll(pageable)
@@ -48,6 +55,7 @@ public class PostController {
     }
     
     @GetMapping("/my-posts")
+    @Operation(summary = "Listar meus posts")
     public ResponseEntity<Page<PostResponseDTO>> getMyPosts(
             @AuthenticationPrincipal User currentUser,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -57,6 +65,7 @@ public class PostController {
     }
     
     @GetMapping("/user/{username}")
+    @Operation(summary = "Listar posts de um usuário")
     public ResponseEntity<Page<PostResponseDTO>> getPostsByUsername(
             @PathVariable String username,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -66,13 +75,15 @@ public class PostController {
     }
     
     @GetMapping("/{id}")
+    @Operation(summary = "Buscar post por ID")
     public ResponseEntity<PostResponseDTO> getPostById(@PathVariable Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         return ResponseEntity.ok(new PostResponseDTO(post));
     }
     
-    @PutMapping("/{id}") 
+    @PutMapping("/{id}")
+    @Operation(summary = "Atualizar post (apenas autor)")
     public ResponseEntity<PostResponseDTO> updatePost(
             @PathVariable Long id,
             @RequestBody @Valid PostRequestDTO postDTO,
@@ -89,6 +100,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar post (autor ou admin)")
     public ResponseEntity<Void> deletePost(
             @PathVariable Long id,
             @AuthenticationPrincipal User currentUser) {

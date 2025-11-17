@@ -1,5 +1,8 @@
 package tech.social.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +24,7 @@ import tech.social.service.TokenService;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Autenticação", description = "Endpoints para autenticação e gerenciamento de usuários")
 public class AuthController {
 
     private AuthenticationManager authenticationManager;
@@ -32,6 +36,7 @@ public class AuthController {
         this.authenticationManager = authenticationManager;
     }
     @PostMapping("/login")
+    @Operation(summary = "Realizar login", description = "Autentica o usuário e retorna um token JWT")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid AuthenticationDTO authDTO) {
         var usernamepassword = new UsernamePasswordAuthenticationToken(authDTO.username(), authDTO.password());
         var auth = this.authenticationManager.authenticate(usernamepassword);
@@ -39,6 +44,7 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResponseDTO(token));
     }
     @PostMapping("/register")
+    @Operation(summary = "Registrar novo usuário", description = "Cria uma nova conta de usuário com role USER")
     public ResponseEntity register(@RequestBody @Valid AuthenticationDTO authDTO) {
         if(this.repository.findByUsername(authDTO.username()) != null) {
             return ResponseEntity.badRequest().body("Username already exists");
@@ -49,6 +55,8 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
     @PatchMapping("/alterrole")
+    @Operation(summary = "Alterar a role de um usuário", description = "Requer permissão de ADMIN")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity promote(@RequestBody @Valid AlterRoleDTO alterRoleDTO) {
         User user = (User) this.repository.findByUsername(alterRoleDTO.username());
         if(user == null) {
